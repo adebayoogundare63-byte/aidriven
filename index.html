@@ -11,17 +11,13 @@
         h1 { color: #333; margin-bottom: 10px; }
         h2 { color: #555; margin: 20px 0 15px 0; }
         .subtitle { color: #777; margin-bottom: 30px; }
-        
         .login-section, .dashboard-section, .logs-section { display: none; }
         .active { display: block; }
-        
         .form-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; }
-        input, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; transition: border 0.3s; }
-        input:focus, select:focus { outline: none; border-color: #667eea; }
-        
-        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: all 0.3s; margin: 5px; font-weight: 600; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        input, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; margin: 5px; font-weight: 600; transition: transform 0.2s; }
+        .btn:hover { transform: translateY(-2px); }
         .btn-primary { background: #667eea; color: white; }
         .btn-success { background: #4CAF50; color: white; }
         .btn-info { background: #2196F3; color: white; }
@@ -29,42 +25,35 @@
         .btn-warning { background: #ff9800; color: white; }
         .btn-secondary { background: #6c757d; color: white; }
         .btn-purple { background: #9c27b0; color: white; }
-        
         .task-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0; }
         .task-btn { padding: 20px; text-align: left; }
-        
         .user-info { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #667eea; }
-        
         .role-section { display: none; background: #fafafa; padding: 20px; border-radius: 10px; margin: 15px 0; border-left: 4px solid #667eea; }
         .role-section.active { display: block; }
-        .role-section h2 { margin-top: 0; }
-        
         table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background: #667eea; color: white; position: sticky; top: 0; }
+        th { background: #667eea; color: white; }
         tr:hover { background: #f5f5f5; }
         .anomaly-row { background: #ffebee !important; }
-        
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin: 20px 0; }
         .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; }
         .stat-number { font-size: 32px; font-weight: bold; }
         .stat-label { font-size: 14px; opacity: 0.9; }
-        
-        .action-buttons { margin: 20px 0; }
-        
         .password-group { display: none; }
         .password-group.show { display: block; }
-        
-        .error-message { color: #c62828; background: #ffebee; padding: 10px; border-radius: 8px; margin-top: 10px; display: none; border-left: 4px solid #c62828; }
+        .error-message { color: #c62828; background: #ffebee; padding: 10px; border-radius: 8px; margin-top: 10px; display: none; }
         .error-message.show { display: block; }
+        .sync-status { font-size: 12px; color: #888; margin-top: 10px; text-align: right; }
+        .sync-ok { color: #2e7d32; }
+        .sync-err { color: #c62828; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🏫 Secondary School Portal</h1>
-        <p class="subtitle">AI-Driven Anomaly Detection Dataset Generator</p>
+        <p class="subtitle">AI-Driven Anomaly Detection Dataset Generator (Cloud-Synced)</p>
 
-        <!-- LOGIN SECTION -->
+        <!-- LOGIN -->
         <div id="loginSection" class="login-section active">
             <h2>Login to Start Session</h2>
             <div class="form-group">
@@ -76,425 +65,310 @@
                     <option value="admin">Administrator</option>
                 </select>
             </div>
-            
-            <!-- Password field (only shown for admin) -->
             <div id="passwordGroup" class="form-group password-group">
                 <label>Admin Password:</label>
                 <input type="password" id="adminPassword" placeholder="Enter admin password">
             </div>
-            
-            <div id="errorMessage" class="error-message">
-                ❌ Invalid admin password. Access denied.
-            </div>
-            
+            <div id="errorMessage" class="error-message"></div>
             <button class="btn btn-primary" onclick="login()">Login & Start Recording</button>
         </div>
 
-        <!-- DASHBOARD SECTION -->
+        <!-- DASHBOARD -->
         <div id="dashboardSection" class="dashboard-section">
             <div class="user-info">
-                <strong>Logged in as:</strong> <span id="displayUserId"></span> 
+                <strong>Logged in as:</strong> <span id="displayUserId"></span>
                 (<span id="displayUserRole"></span>)
             </div>
 
-            <!-- STUDENT TASKS -->
             <div id="studentTasks" class="role-section">
                 <h2>🎓 Student Tasks</h2>
                 <div class="task-grid">
-                    <button class="btn btn-success task-btn" onclick="performAction('view', 'my_grades')">
-                        👁️ View My Grades
-                    </button>
-                    <button class="btn btn-success task-btn" onclick="performAction('view', 'my_attendance')">
-                        👁️ View My Attendance
-                    </button>
-                    <button class="btn btn-info task-btn" onclick="performAction('download', 'my_report_card')">
-                        ⬇️ Download My Report Card
-                    </button>
-                    <button class="btn btn-success task-btn" onclick="performAction('view', 'class_schedule')">
-                        👁️ View Class Schedule
-                    </button>
-                    <button class="btn btn-info task-btn" onclick="performAction('download', 'assignment_templates')">
-                        ⬇️ Download Assignment Templates
-                    </button>
+                    <button class="btn btn-success task-btn" onclick="performAction('view','my_grades')">👁️ View My Grades</button>
+                    <button class="btn btn-success task-btn" onclick="performAction('view','my_attendance')">👁️ View My Attendance</button>
+                    <button class="btn btn-info task-btn" onclick="performAction('download','my_report_card')">⬇️ Download My Report Card</button>
+                    <button class="btn btn-success task-btn" onclick="performAction('view','class_schedule')">👁️ View Class Schedule</button>
+                    <button class="btn btn-info task-btn" onclick="performAction('download','assignment_templates')">⬇️ Download Assignment Templates</button>
                 </div>
             </div>
 
-            <!-- TEACHER TASKS -->
             <div id="teacherTasks" class="role-section">
                 <h2>👨‍🏫 Teacher Tasks</h2>
                 <div class="task-grid">
-                    <button class="btn btn-success task-btn" onclick="performAction('view', 'class_grades')">
-                        👁️ View Class Grades
-                    </button>
-                    <button class="btn btn-success task-btn" onclick="performAction('view', 'class_attendance')">
-                        👁️ View Class Attendance
-                    </button>
-                    <button class="btn btn-purple task-btn" onclick="performAction('upload', 'exam_and_test')">
-                        ⬆️ Upload Exam and Test
-                    </button>
-                    <button class="btn btn-purple task-btn" onclick="performAction('upload', 'assignments')">
-                        ⬆️ Upload Assignments
-                    </button>
-                    <button class="btn btn-purple task-btn" onclick="performAction('upload', 'student_grades')">
-                        ⬆️ Upload Student Grades
-                    </button>
+                    <button class="btn btn-success task-btn" onclick="performAction('view','class_grades')">👁️ View Class Grades</button>
+                    <button class="btn btn-success task-btn" onclick="performAction('view','class_attendance')">👁️ View Class Attendance</button>
+                    <button class="btn btn-purple task-btn" onclick="performAction('upload','exam_and_test')">⬆️ Upload Exam and Test</button>
+                    <button class="btn btn-purple task-btn" onclick="performAction('upload','assignments')">⬆️ Upload Assignments</button>
+                    <button class="btn btn-purple task-btn" onclick="performAction('upload','student_grades')">⬆️ Upload Student Grades</button>
                 </div>
             </div>
 
-            <!-- PARENT TASKS -->
             <div id="parentTasks" class="role-section">
-                <h2>👨‍👩‍👧 Parent Tasks</h2>
+                <h2>‍👩‍👧 Parent Tasks</h2>
                 <div class="task-grid">
-                    <button class="btn btn-success task-btn" onclick="performAction('view', 'child_grades')">
-                        👁️ View Child's Grades
-                    </button>
-                    <button class="btn btn-success task-btn" onclick="performAction('view', 'child_attendance')">
-                        👁️ View Child's Attendance
-                    </button>
-                    <button class="btn btn-info task-btn" onclick="performAction('download', 'child_report_card')">
-                        ⬇️ Download Child's Report Card
-                    </button>
-                    <button class="btn btn-success task-btn" onclick="performAction('view', 'fee_payment_status')">
-                        👁️ View Fee Payment Status
-                    </button>
-                    <button class="btn btn-info task-btn" onclick="performAction('download', 'fee_receipt')">
-                        ⬇️ Download Fee Receipt
-                    </button>
-                    <button class="btn btn-success task-btn" onclick="performAction('view', 'school_notices')">
-                        👁️ View School Notices
-                    </button>
-                    <button class="btn btn-success task-btn" onclick="performAction('view', 'exam_schedule')">
-                        👁️ View Exam Schedule
-                    </button>
-                    <button class="btn btn-purple task-btn" onclick="performAction('message', 'teacher_contact')">
-                        ✉️ Message Teacher
-                    </button>
+                    <button class="btn btn-success task-btn" onclick="performAction('view','child_grades')">👁️ View Child's Grades</button>
+                    <button class="btn btn-success task-btn" onclick="performAction('view','child_attendance')">️ View Child's Attendance</button>
+                    <button class="btn btn-info task-btn" onclick="performAction('download','child_report_card')">⬇️ Download Child's Report Card</button>
+                    <button class="btn btn-success task-btn" onclick="performAction('view','fee_payment_status')">👁️ View Fee Payment Status</button>
+                    <button class="btn btn-info task-btn" onclick="performAction('download','fee_receipt')">⬇️ Download Fee Receipt</button>
+                    <button class="btn btn-success task-btn" onclick="performAction('view','school_notices')">👁️ View School Notices</button>
+                    <button class="btn btn-success task-btn" onclick="performAction('view','exam_schedule')">️ View Exam Schedule</button>
+                    <button class="btn btn-purple task-btn" onclick="performAction('message','teacher_contact')">✉️ Message Teacher</button>
                 </div>
             </div>
 
-            <!-- ADMIN TASKS (Only visible to admin) -->
             <div id="adminTasks" class="role-section">
                 <h2>🔐 Administrator Tasks (Restricted)</h2>
                 <div class="task-grid">
-                    <button class="btn btn-success task-btn" onclick="performAction('view', 'all_student_grades')">
-                        👁️ View All Student Grades
-                    </button>
-                    <button class="btn btn-success task-btn" onclick="performAction('view', 'all_attendance_records')">
-                        👁️ View All Attendance Records
-                    </button>
-                    <button class="btn btn-success task-btn" onclick="performAction('view', 'staff_payroll')">
-                        👁️ View Staff Payroll
-                    </button>
-                    <button class="btn btn-success task-btn" onclick="performAction('view', 'user_accounts')">
-                        👁️ View User Accounts
-                    </button>
-                    <button class="btn btn-danger task-btn" onclick="performAction('export', 'full_student_database')">
-                        📤 Export Full Student Database (CSV)
-                    </button>
-                    <button class="btn btn-danger task-btn" onclick="performAction('export', 'medical_records')">
-                        📤 Export Medical Records
-                    </button>
-                    <button class="btn btn-danger task-btn" onclick="performAction('export', 'parent_contacts')">
-                        📤 Export Parent Contact List
-                    </button>
-                    <button class="btn btn-danger task-btn" onclick="performAction('export', 'staff_payroll_data')">
-                        📤 Export Staff Payroll Data
-                    </button>
-                    <button class="btn btn-purple task-btn" onclick="performAction('manage', 'user_accounts')">
-                        ⚙️ Manage User Accounts
-                    </button>
+                    <button class="btn btn-success task-btn" onclick="performAction('view','all_student_grades')">👁️ View All Student Grades</button>
+                    <button class="btn btn-success task-btn" onclick="performAction('view','all_attendance_records')">👁️ View All Attendance Records</button>
+                    <button class="btn btn-success task-btn" onclick="performAction('view','staff_payroll')">👁️ View Staff Payroll</button>
+                    <button class="btn btn-success task-btn" onclick="performAction('view','user_accounts')">️ View User Accounts</button>
+                    <button class="btn btn-danger task-btn" onclick="performAction('export','full_student_database')">📤 Export Full Student Database</button>
+                    <button class="btn btn-danger task-btn" onclick="performAction('export','medical_records')">📤 Export Medical Records</button>
+                    <button class="btn btn-danger task-btn" onclick="performAction('export','parent_contacts')"> Export Parent Contact List</button>
+                    <button class="btn btn-danger task-btn" onclick="performAction('export','staff_payroll_data')">📤 Export Staff Payroll Data</button>
+                    <button class="btn btn-purple task-btn" onclick="performAction('manage','user_accounts')">⚙️ Manage User Accounts</button>
                 </div>
             </div>
 
             <div class="action-buttons">
-                <button id="viewLogsBtn" class="btn btn-warning" onclick="showLogs()" style="display: none;">📊 View Recorded Logs</button>
+                <button id="viewLogsBtn" class="btn btn-warning" onclick="showLogs()" style="display:none;">📊 View Central Logs (All Devices)</button>
                 <button class="btn btn-secondary" onclick="logout()">🚪 Logout</button>
             </div>
+            <div id="syncStatus" class="sync-status"></div>
         </div>
 
-        <!-- LOGS SECTION -->
+        <!-- LOGS -->
         <div id="logsSection" class="logs-section">
-            <h2>📊 Activity Logs (Dataset)</h2>
-            
+            <h2>📊 Central Activity Logs (All Devices)</h2>
             <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-number" id="totalLogs">0</div>
-                    <div class="stat-label">Total Logs</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="anomalyCount">0</div>
-                    <div class="stat-label">Potential Anomalies</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="dataVolume">0</div>
-                    <div class="stat-label">Total Data (MB)</div>
-                </div>
+                <div class="stat-card"><div class="stat-number" id="totalLogs">0</div><div class="stat-label">Total Logs</div></div>
+                <div class="stat-card"><div class="stat-number" id="anomalyCount">0</div><div class="stat-label">Potential Anomalies</div></div>
+                <div class="stat-card"><div class="stat-number" id="dataVolume">0</div><div class="stat-label">Total Data (MB)</div></div>
             </div>
-
             <div class="action-buttons">
-                <button class="btn btn-primary" onclick="exportToCSV()">💾 Export as CSV for AI Training</button>
-                <button class="btn btn-secondary" onclick="clearLogs()">🗑️ Clear All Logs</button>
+                <button class="btn btn-primary" onclick="exportToCSV()">💾 Download as CSV</button>
+                <button class="btn btn-info" onclick="showLogs()"> Refresh Logs</button>
                 <button class="btn btn-warning" onclick="showDashboard()">← Back to Dashboard</button>
             </div>
-
-            <div style="max-height: 400px; overflow-y: auto; margin-top: 20px;">
-                <table id="logsTable">
-                    <thead>
-                        <tr>
-                            <th>Timestamp</th>
-                            <th>User ID</th>
-                            <th>Role</th>
-                            <th>Action</th>
-                            <th>Resource</th>
-                            <th>Data (Bytes)</th>
-                            <th>IP Address</th>
-                        </tr>
-                    </thead>
+            <div style="max-height:400px;overflow-y:auto;margin-top:20px;">
+                <table>
+                    <thead><tr><th>Time</th><th>User</th><th>Role</th><th>Action</th><th>Resource</th><th>Bytes</th><th>IP</th></tr></thead>
                     <tbody id="logsBody"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <script>
-        let currentUser = { id: '', role: '' };
-        let activityLogs = JSON.parse(localStorage.getItem('schoolActivityLogs')) || [];
-        
-        // Admin password (in a real system this would be hashed and stored server-side)
-        const ADMIN_PASSWORD = "admin123";
-        
-        // User ID counters for each role
-        let userCounters = JSON.parse(localStorage.getItem('userCounters')) || {
-            student: 0,
-            teacher: 0,
-            parent: 0,
-            admin: 0
-        };
+<script>
+/* ============================================================
+   CLOUD CONFIG — Your JSONBin.io Details
+   ============================================================ */
+const JSONBIN_ID   = "6ae350fdffd5d1605395c46c";
+const JSONBIN_KEY  = "$2a$10$I40mOhcqwBwJ7a0cPPa5vOWRgGM7nLlHALtU967e99M.E1KxFhABC";
+const ADMIN_PASSWORD = "admin123";
+const JSONBIN_URL  = `https://api.jsonbin.io/v3/b/${JSONBIN_ID}`;
 
-        // Show/hide password field based on role selection
-        function togglePasswordField() {
-            const role = document.getElementById('userRole').value;
-            const passwordGroup = document.getElementById('passwordGroup');
-            const errorMessage = document.getElementById('errorMessage');
-            
-            if (role === 'admin') {
-                passwordGroup.classList.add('show');
-            } else {
-                passwordGroup.classList.remove('show');
-                errorMessage.classList.remove('show');
-                document.getElementById('adminPassword').value = '';
-            }
-        }
+/* ============================================================
+   STATE
+   ============================================================ */
+let currentUser = { id: '', role: '' };
+let activityLogs = [];  
+let userCounters = JSON.parse(localStorage.getItem('userCounters')) ||
+                   { student: 0, teacher: 0, parent: 0, admin: 0 };
 
-        function generateUserId(role) {
-            userCounters[role]++;
-            localStorage.setItem('userCounters', JSON.stringify(userCounters));
-            
-            const prefix = role === 'student' ? 'STU' : 
-                          role === 'teacher' ? 'TCH' : 
-                          role === 'parent' ? 'PAR' : 'ADM';
-            
-            return `${prefix}_${String(userCounters[role]).padStart(3, '0')}`;
-        }
+/* ============================================================
+   CLOUD SYNC — JSONBin.io
+   ============================================================ */
+async function cloudLoadLogs() {
+    const res = await fetch(`${JSONBIN_URL}/latest`, {
+        headers: { "X-Master-Key": JSONBIN_KEY }
+    });
+    if (!res.ok) throw new Error("Cloud load failed: " + res.status);
+    const data = await res.json();
+    // Extract the logs array from the {"logs": []} object
+    return data.record && data.record.logs ? data.record.logs : [];
+}
 
-        function login() {
-            const userRole = document.getElementById('userRole').value;
-            const errorMessage = document.getElementById('errorMessage');
-            
-            // Validate admin password
-            if (userRole === 'admin') {
-                const password = document.getElementById('adminPassword').value;
-                if (password !== ADMIN_PASSWORD) {
-                    errorMessage.classList.add('show');
-                    // Log the failed login attempt as an anomaly!
-                    logActivity('failed_login', 'portal_auth', 0, 'admin');
-                    return;
-                }
-            }
-            
-            errorMessage.classList.remove('show');
-            
-            // Auto-generate User ID based on role
-            const userId = generateUserId(userRole);
-            
-            currentUser = { id: userId, role: userRole };
-            logActivity('login', 'portal_auth', 0);
-            
-            document.getElementById('displayUserId').textContent = userId;
-            document.getElementById('displayUserRole').textContent = userRole;
-            
-            // Hide all role sections first
-            document.getElementById('studentTasks').classList.remove('active');
-            document.getElementById('teacherTasks').classList.remove('active');
-            document.getElementById('parentTasks').classList.remove('active');
-            document.getElementById('adminTasks').classList.remove('active');
-            
-            // Show only the relevant role section
-            if (userRole === 'student') {
-                document.getElementById('studentTasks').classList.add('active');
-            } else if (userRole === 'teacher') {
-                document.getElementById('teacherTasks').classList.add('active');
-            } else if (userRole === 'parent') {
-                document.getElementById('parentTasks').classList.add('active');
-            } else if (userRole === 'admin') {
-                document.getElementById('adminTasks').classList.add('active');
-            }
-            
-            // Show "View Recorded Logs" button ONLY for admin
-            const viewLogsBtn = document.getElementById('viewLogsBtn');
-            if (userRole === 'admin') {
-                viewLogsBtn.style.display = 'inline-block';
-            } else {
-                viewLogsBtn.style.display = 'none';
-            }
-            
-            showDashboard();
-        }
+async function cloudSaveLogs(logs) {
+    const res = await fetch(JSONBIN_URL, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Master-Key": JSONBIN_KEY
+        },
+        // Save as {"logs": [...]}
+        body: JSON.stringify({ logs: logs })
+    });
+    if (!res.ok) throw new Error("Cloud save failed: " + res.status);
+}
 
-        function performAction(actionType, resource) {
-            let dataVolume = 0;
-            
-            // Simulate realistic data volumes
-            if (actionType === 'download') {
-                if (resource.includes('report_card') || resource.includes('receipt')) {
-                    dataVolume = Math.floor(Math.random() * (500000 - 50000) + 50000); // 50KB to 500KB
-                } else if (resource.includes('exam_papers') || resource.includes('templates')) {
-                    dataVolume = Math.floor(Math.random() * (5000000 - 100000) + 100000); // 100KB to 5MB
-                } else {
-                    dataVolume = Math.floor(Math.random() * (2000000 - 50000) + 50000);
-                }
-            } else if (actionType === 'upload') {
-                // Uploads (exams, tests, assignments)
-                if (resource.includes('exam_and_test')) {
-                    dataVolume = Math.floor(Math.random() * (10000000 - 500000) + 500000); // 500KB to 10MB
-                } else if (resource.includes('assignments')) {
-                    dataVolume = Math.floor(Math.random() * (5000000 - 100000) + 100000); // 100KB to 5MB
-                } else {
-                    dataVolume = Math.floor(Math.random() * (2000000 - 50000) + 50000);
-                }
-            } else if (actionType === 'export') {
-                // Exports are large - potential exfiltration indicators
-                if (resource.includes('full_student_database') || resource.includes('medical_records')) {
-                    dataVolume = Math.floor(Math.random() * (100000000 - 10000000) + 10000000); // 10MB to 100MB
-                } else {
-                    dataVolume = Math.floor(Math.random() * (50000000 - 5000000) + 5000000); // 5MB to 50MB
-                }
-            }
+function setSyncStatus(msg, ok = true) {
+    const el = document.getElementById('syncStatus');
+    el.textContent = (ok ? "✅ " : "️ ") + msg;
+    el.className = "sync-status " + (ok ? "sync-ok" : "sync-err");
+}
 
-            logActivity(actionType, resource, dataVolume);
-            alert(`✅ Action recorded: ${actionType.toUpperCase()} on ${resource}`);
-        }
+async function appendLog(log) {
+    try {
+        const remote = await cloudLoadLogs();
+        remote.push(log);
+        await cloudSaveLogs(remote);
+        setSyncStatus("Log synced to cloud (" + remote.length + " total)");
+    } catch (e) {
+        setSyncStatus("Cloud sync failed — saved locally only", false);
+        const local = JSON.parse(localStorage.getItem('schoolActivityLogs') || '[]');
+        local.push(log);
+        localStorage.setItem('schoolActivityLogs', JSON.stringify(local));
+    }
+}
 
-        function logActivity(actionType, resource, dataVolume, overrideRole = null) {
-            const log = {
-                timestamp: new Date().toISOString(),
-                user_id: overrideRole ? 'UNKNOWN' : currentUser.id,
-                user_role: overrideRole || currentUser.role,
-                action_type: actionType,
-                resource: resource,
-                data_volume_bytes: dataVolume,
-                ip_address: '192.168.1.' + Math.floor(Math.random() * 255)
-            };
+/* ============================================================
+   LOGIN / LOGIC
+   ============================================================ */
+function togglePasswordField() {
+    const isAdmin = document.getElementById('userRole').value === 'admin';
+    document.getElementById('passwordGroup').classList.toggle('show', isAdmin);
+    document.getElementById('errorMessage').classList.remove('show');
+    if (!isAdmin) document.getElementById('adminPassword').value = '';
+}
 
-            activityLogs.push(log);
-            localStorage.setItem('schoolActivityLogs', JSON.stringify(activityLogs));
-        }
+function generateUserId(role) {
+    userCounters[role]++;
+    localStorage.setItem('userCounters', JSON.stringify(userCounters));
+    const prefix = { student: 'STU', teacher: 'TCH', parent: 'PAR', admin: 'ADM' }[role];
+    return `${prefix}_${String(userCounters[role]).padStart(3, '0')}`;
+}
 
-        function showDashboard() {
-            document.getElementById('loginSection').classList.remove('active');
-            document.getElementById('logsSection').classList.remove('active');
-            document.getElementById('dashboardSection').classList.add('active');
-        }
+function login() {
+    const role = document.getElementById('userRole').value;
+    const errBox = document.getElementById('errorMessage');
 
-        function showLogs() {
-            document.getElementById('dashboardSection').classList.remove('active');
-            document.getElementById('loginSection').classList.remove('active');
-            document.getElementById('logsSection').classList.add('active');
-            renderLogs();
-        }
+    if (role === 'admin' && document.getElementById('adminPassword').value !== ADMIN_PASSWORD) {
+        errBox.textContent = "❌ Invalid admin password. Access denied.";
+        errBox.classList.add('show');
+        appendLog({
+            timestamp: new Date().toISOString(), user_id: 'UNKNOWN', user_role: 'admin',
+            action_type: 'failed_login', resource: 'portal_auth',
+            data_volume_bytes: 0, ip_address: 'browser'
+        });
+        return;
+    }
+    errBox.classList.remove('show');
 
-        function renderLogs() {
-            const tbody = document.getElementById('logsBody');
-            tbody.innerHTML = '';
-            
-            let anomalyCount = 0;
-            let totalDataVolume = 0;
-            const sortedLogs = [...activityLogs].reverse();
+    const userId = generateUserId(role);
+    currentUser = { id: userId, role };
 
-            sortedLogs.forEach(log => {
-                const row = tbody.insertRow();
-                
-                // Flag anomalies: large exports (>1MB), failed logins, or suspicious role/resource combinations
-                const isAnomaly = log.data_volume_bytes > 1000000 || 
-                    log.action_type === 'failed_login' ||
-                    (log.user_role === 'student' && log.resource.includes('medical_records')) ||
-                    (log.user_role === 'parent' && log.resource.includes('payroll')) ||
-                    (log.action_type === 'export' && log.user_role !== 'admin');
-                
-                if (isAnomaly) {
-                    row.classList.add('anomaly-row');
-                    anomalyCount++;
-                }
-                
-                totalDataVolume += log.data_volume_bytes;
+    appendLog({
+        timestamp: new Date().toISOString(), user_id: userId, user_role: role,
+        action_type: 'login', resource: 'portal_auth',
+        data_volume_bytes: 0, ip_address: 'browser'
+    });
 
-                row.innerHTML = `
-                    <td>${new Date(log.timestamp).toLocaleString()}</td>
-                    <td>${log.user_id}</td>
-                    <td>${log.user_role}</td>
-                    <td>${log.action_type}</td>
-                    <td>${log.resource}</td>
-                    <td>${log.data_volume_bytes.toLocaleString()}</td>
-                    <td>${log.ip_address}</td>
-                `;
-            });
+    document.getElementById('displayUserId').textContent = userId;
+    document.getElementById('displayUserRole').textContent = role;
 
-            document.getElementById('totalLogs').textContent = activityLogs.length;
-            document.getElementById('anomalyCount').textContent = anomalyCount;
-            document.getElementById('dataVolume').textContent = (totalDataVolume / 1000000).toFixed(2);
-        }
+    ['student','teacher','parent','admin'].forEach(r =>
+        document.getElementById(r + 'Tasks').classList.remove('active'));
+    document.getElementById(role + 'Tasks').classList.add('active');
 
-        function exportToCSV() {
-            if (activityLogs.length === 0) {
-                alert('No logs to export!');
-                return;
-            }
+    document.getElementById('viewLogsBtn').style.display =
+        role === 'admin' ? 'inline-block' : 'none';
 
-            const headers = ['timestamp', 'user_id', 'user_role', 'action_type', 'resource', 'data_volume_bytes', 'ip_address'];
-            const csvContent = [
-                headers.join(','),
-                ...activityLogs.map(log => 
-                    headers.map(h => `"${log[h]}"`).join(',')
-                )
-            ].join('\n');
+    showDashboard();
+}
 
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `school_activity_logs_${new Date().getTime()}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
-        }
+function performAction(actionType, resource) {
+    let dataVolume = 0;
+    if (actionType === 'download') dataVolume = Math.floor(Math.random() * 450000 + 50000);
+    else if (actionType === 'upload') {
+        dataVolume = resource.includes('exam_and_test')
+            ? Math.floor(Math.random() * 9500000 + 500000)
+            : Math.floor(Math.random() * 4900000 + 100000);
+    } else if (actionType === 'export') {
+        dataVolume = (resource.includes('full_student_database') || resource.includes('medical_records'))
+            ? Math.floor(Math.random() * 90000000 + 10000000)
+            : Math.floor(Math.random() * 45000000 + 5000000);
+    }
 
-        function clearLogs() {
-            if (confirm('Are you sure you want to delete all logs? This cannot be undone.')) {
-                activityLogs = [];
-                localStorage.removeItem('schoolActivityLogs');
-                renderLogs();
-            }
-        }
+    appendLog({
+        timestamp: new Date().toISOString(), user_id: currentUser.id, user_role: currentUser.role,
+        action_type: actionType, resource: resource,
+        data_volume_bytes: dataVolume, ip_address: 'browser'
+    });
 
-        function logout() {
-            logActivity('logout', 'portal_auth', 0);
-            currentUser = { id: '', role: '' };
-            document.getElementById('dashboardSection').classList.remove('active');
-            document.getElementById('loginSection').classList.add('active');
-            document.getElementById('adminPassword').value = '';
-            document.getElementById('passwordGroup').classList.remove('show');
-            document.getElementById('errorMessage').classList.remove('show');
-            document.getElementById('viewLogsBtn').style.display = 'none';
-        }
-    </script>
+    alert(`✅ Action recorded: ${actionType.toUpperCase()} on ${resource}`);
+}
+
+function showDashboard() {
+    document.getElementById('loginSection').classList.remove('active');
+    document.getElementById('logsSection').classList.remove('active');
+    document.getElementById('dashboardSection').classList.add('active');
+}
+
+async function showLogs() {
+    if (currentUser.role !== 'admin') return;
+    try {
+        setSyncStatus("Loading logs from cloud...");
+        activityLogs = await cloudLoadLogs();
+        document.getElementById('dashboardSection').classList.remove('active');
+        document.getElementById('loginSection').classList.remove('active');
+        document.getElementById('logsSection').classList.add('active');
+        renderLogs(activityLogs);
+        setSyncStatus(`Loaded ${activityLogs.length} logs from cloud`);
+    } catch (e) {
+        setSyncStatus("Cloud load failed: " + e.message, false);
+    }
+}
+
+function renderLogs(logs) {
+    const tbody = document.getElementById('logsBody');
+    tbody.innerHTML = '';
+    let anomalies = 0, total = 0;
+    [...logs].reverse().forEach(log => {
+        const row = tbody.insertRow();
+        const isAnomaly = log.data_volume_bytes > 1000000 ||
+            log.action_type === 'failed_login';
+        if (isAnomaly) { row.classList.add('anomaly-row'); anomalies++; }
+        total += log.data_volume_bytes;
+        row.innerHTML = `
+            <td>${new Date(log.timestamp).toLocaleString()}</td>
+            <td>${log.user_id}</td><td>${log.user_role}</td>
+            <td>${log.action_type}</td><td>${log.resource}</td>
+            <td>${log.data_volume_bytes.toLocaleString()}</td>
+            <td>${log.ip_address}</td>`;
+    });
+    document.getElementById('totalLogs').textContent = logs.length;
+    document.getElementById('anomalyCount').textContent = anomalies;
+    document.getElementById('dataVolume').textContent = (total / 1e6).toFixed(2);
+}
+
+function exportToCSV() {
+    if (!activityLogs.length) { alert("No logs loaded. Click View Central Logs first."); return; }
+    const headers = ['timestamp','user_id','user_role','action_type','resource','data_volume_bytes','ip_address'];
+    const csv = [headers.join(','),
+        ...activityLogs.map(l => headers.map(h => `"${l[h]}"`).join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `school_logs_${Date.now()}.csv`;
+    a.click();
+}
+
+function logout() {
+    appendLog({
+        timestamp: new Date().toISOString(), user_id: currentUser.id, user_role: currentUser.role,
+        action_type: 'logout', resource: 'portal_auth',
+        data_volume_bytes: 0, ip_address: 'browser'
+    });
+    currentUser = { id: '', role: '' };
+    document.getElementById('dashboardSection').classList.remove('active');
+    document.getElementById('logsSection').classList.remove('active');
+    document.getElementById('loginSection').classList.add('active');
+    document.getElementById('viewLogsBtn').style.display = 'none';
+    document.getElementById('adminPassword').value = '';
+    document.getElementById('passwordGroup').classList.remove('show');
+}
+</script>
 </body>
 </html>
